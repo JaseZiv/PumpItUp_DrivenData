@@ -21,9 +21,9 @@ library(lubridate)
 options(scipen = 9999)
 
 # will read in the variables as characters, and then change back to factors later
-train <- read.csv("/Users/jasonzivkovic/Documents/PumpItUp_DrivenDataComp/training_set_values.csv", stringsAsFactors = FALSE, na.strings = c("NA", ""))
-train_labels <- read.csv("/Users/jasonzivkovic/Documents/PumpItUp_DrivenDataComp/training_set_labels.csv", na.strings = c("NA", ""))
-test <- read.csv("/Users/jasonzivkovic/Documents/PumpItUp_DrivenDataComp/test_set_values.csv", na.strings = c("NA", ""))
+train <- read.csv("/Users/jasonzivkovic/Documents/PumpItUp_DrivenDataComp/DataFiles/training_set_values.csv", stringsAsFactors = FALSE, na.strings = c("NA", ""))
+train_labels <- read.csv("/Users/jasonzivkovic/Documents/PumpItUp_DrivenDataComp/DataFiles/training_set_labels.csv", na.strings = c("NA", ""))
+test <- read.csv("/Users/jasonzivkovic/Documents/PumpItUp_DrivenDataComp/DataFiles/test_set_values.csv", na.strings = c("NA", ""))
 
 # join status_group variable to rtaining set
 train <- train %>%
@@ -268,7 +268,7 @@ joined_test$status_group <- predict(model6, joined_test)
 
 submission6 <- joined_test %>% select(id, status_group)
 
-write.csv(submission6, "submission6.csv", row.names = FALSE)
+write.csv(submission6, "submission6_v2.csv", row.names = FALSE)
 
 
 ###########################################################################################################################
@@ -279,6 +279,34 @@ write.csv(submission6, "submission6.csv", row.names = FALSE)
 
 ###########################################################################################################################
 
+
+model8 <- train(
+  status_group ~ .,
+  tuneLength = 1,
+  data = joined_train, method = "ranger",
+  trControl = trainControl(method = "cv", number = 5, verboseIter = TRUE)
+)
+
+
+predict_train <- predict(model8, joined_train)
+
+confusionMatrix(train_label, predict_train)
+
+joined_test$status_group <- predict(model8, joined_test)
+
+
+submission8 <- joined_test %>% select(id, status_group)
+
+write.csv(submission8, "submission8.csv", row.names = FALSE)
+
+
+###########################################################################################################################
+##### Model Score: 0.8077. Not the best score. Will look to bin amount_tsh as this model only had the raw variable #####
+
+# model8 variables: date_recorded + basin + public_meeting + scheme_management + extraction_type + management + payment +
+# water_quality + quantity + source + waterpoint_type + construction_year_bin + population_bin + gps_height + region + amount_tsh
+
+###########################################################################################################################
 
 
 
